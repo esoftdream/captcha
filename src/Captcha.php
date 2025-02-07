@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries;
+namespace Esoftdream;
 
 use Laminas\Captcha\Image;
 
