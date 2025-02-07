@@ -1,0 +1,34 @@
+{
+    "name": "esoftdream/captcha",
+    "description": "Captcha",
+    "license": "proprietary",
+    "type": "library",
+    "keywords": [
+        "php",
+        "captcha",
+        "codeigniter4"
+    ],
+    "authors": [
+        {
+            "name": "Toto Prayogo",
+            "email": "totoprayogo1916@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/esoftdream/captcha",
+    "require": {
+        "php": ">=7.4",
+        "codeigniter4/framework": "^4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Esoftdream\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist"
+    }
+}
