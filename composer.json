@@ -1,6 +1,6 @@
 {
     "name": "esoftdream/captcha",
-    "description": "Captcha for CodeIgniter4",
+    "description": "Captcha",
     "license": "proprietary",
     "type": "library",
     "keywords": [
@@ -12,7 +12,6 @@
         {
             "name": "Toto Prayogo",
             "email": "totoprayogo1916@gmail.com",
-            "homepage": "https://totoprayogo1916.github.io",
             "role": "Developer"
         }
     ],
