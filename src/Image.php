@@ -26,8 +26,7 @@ use function session;
 class Image
 {
     protected string $imgDir = WRITEPATH . 'cache/';
-    protected string $imgUrl = "/images/captcha/";
-    protected string $font = APPPATH . 'Libraries/Securimage/fonts/mangalb.ttf';
+    protected string $font = './font/mangalb.ttf';
     protected int $fontSize = 24;
     protected int $width = 200;
     protected int $height = 50;
