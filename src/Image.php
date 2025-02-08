@@ -26,7 +26,7 @@ use function session;
 class Image
 {
     protected string $imgDir = WRITEPATH . 'cache/';
-    protected string $font = './font/mangalb.ttf';
+    protected string $font = __DIR__ . '/font/mangalb.ttf';
     protected int $fontSize = 24;
     protected int $width = 200;
     protected int $height = 50;

@@ -52,7 +52,7 @@ class Captcha
      *
      * @return bool true jika input user sama dengan CAPTCHA yang di generate
      */
-    public function verify(string $string):bool
+    public function verify(string $string): bool
     {
         $word = session()->get('captcha_word');
 
