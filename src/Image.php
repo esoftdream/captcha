@@ -144,7 +144,7 @@ class Image
         $id = $this->generateRandomId();
         $this->setId($id);
 
-        $word = random_string('alnum', $this->wordLength);
+        $word = random_string('alpha', $this->wordLength);
         $this->setWord($word);
 
         return $id;
@@ -177,6 +177,8 @@ class Image
      */
     protected function setWord(string $word): void
     {
+        $word = strtolower($word);
+
         session()->set('word', $word);
         $this->word = $word;
     }
