@@ -20,7 +20,7 @@ class Captcha
      *
      * @return void|false
      */
-    public function generate()
+    public function generate(string $baseUrl  = 'captcha/image/')
     {
         $captcha = new \Esoftdream\Image();
         $result = $captcha->generate();
@@ -30,7 +30,7 @@ class Captcha
 
         return response()->setJSON([
             'captcha_id' => $result['id'],
-            'image_url'  => base_url('captcha/image/' . $result['id'])
+            'image_url'  => base_url($baseUrl . $result['id'])
         ]);
     }
 
