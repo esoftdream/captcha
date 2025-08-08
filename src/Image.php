@@ -4,29 +4,10 @@ namespace Esoftdream;
 
 use Exception;
 
-use function extension_loaded;
-use function file_exists;
-use function function_exists;
-use function imagecolorallocate;
-use function imagecreatetruecolor;
-use function imagedestroy;
-use function imagefilledellipse;
-use function imagefilledrectangle;
-use function imageftbbox;
-use function imagefttext;
-use function imageline;
-use function imagepng;
-use function mt_rand;
-use function random_bytes;
-use function session;
-
-/**
- * Image-based CAPTCHA class
- */
 class Image
 {
-    protected string $imgDir = WRITEPATH . 'cache/';
-    protected string $font = __DIR__ . '/font/mangalb.ttf';
+    protected string $imgDir;
+    protected string $font;
     protected int $fontSize = 24;
     protected int $width = 200;
     protected int $height = 50;
@@ -35,196 +16,128 @@ class Image
     protected int $lineNoiseLevel = 5;
     protected int $expiration = 600;
     protected ?string $word = null;
-    protected int $wordLength = 8;
+    protected int $wordLength = 6;
     protected ?string $id = null;
 
-    /**
-     * Constructor
-     *
-     * @throws Exception If required GD functions are missing.
-     */
-    public function __construct()
+    public function __construct(string $imgDir = null, string $fontPath = null)
     {
         if (!extension_loaded("gd")) {
             throw new Exception("GD extension is required for CAPTCHA generation.");
         }
-        if (!function_exists("imagepng")) {
-            throw new Exception("PNG support in GD is required.");
+        if (!function_exists("imagepng") || !function_exists("imageftbbox")) {
+            throw new Exception("PNG & FreeType support in GD are required.");
         }
-        if (!function_exists("imageftbbox")) {
-            throw new Exception("FreeType support in GD is required.");
+
+        $this->imgDir = $imgDir ?? WRITEPATH . 'cache/';
+        $this->font   = $fontPath ?? __DIR__ . '/font/mangalb.ttf';
+
+        if (!is_dir($this->imgDir) && !mkdir($this->imgDir, 0777, true)) {
+            throw new Exception("Failed to create CAPTCHA directory: {$this->imgDir}");
+        }
+        if (!file_exists($this->font)) {
+            throw new Exception("Font file not found: {$this->font}");
         }
 
         helper('text');
     }
 
-    /**
-     * Set the word length for the CAPTCHA
-     *
-     * @param int $wordLength The length of the generated word.
-     * @return $this
-     */
-    public function setWordLength(int $wordLength)
+    public function setWordLength(int $length): self
     {
-        $this->wordLength = $wordLength;
+        $this->wordLength = max(4, $length);
         return $this;
     }
 
-    /**
-     * Set the width of the CAPTCHA image
-     *
-     * @param int $width The image width in pixels.
-     * @return $this
-     */
-    public function setWidth(int $width)
+    public function setWidth(int $width): self
     {
-        $this->width = $width;
+        $this->width = max(100, $width);
         return $this;
     }
 
-    /**
-     * Set the height of the CAPTCHA image
-     *
-     * @param int $height The image height in pixels.
-     * @return $this
-     */
-    public function setHeight(int $height)
+    public function setHeight(int $height): self
     {
-        $this->height = $height;
+        $this->height = max(30, $height);
         return $this;
     }
 
-    /**
-     * Get the image directory path
-     *
-     * @return string The directory where CAPTCHA images are stored.
-     */
+    public function setFontSize(int $size): self
+    {
+        $this->fontSize = $size;
+        return $this;
+    }
+
     public function getImgDir(): string
     {
         return $this->imgDir;
     }
 
-    /**
-     * Get the file suffix for CAPTCHA images
-     *
-     * @return string The file extension used for CAPTCHA images.
-     */
     public function getSuffix(): string
     {
         return $this->suffix;
     }
 
     /**
-     * Generate a CAPTCHA image
-     *
-     * @return string The unique ID of the generated CAPTCHA.
+     * Generate a CAPTCHA and return both ID and word
      */
-    public function generate(): string
+    public function generate(): array
     {
-        $id    = $this->generateId();
+        $this->cleanupOldCaptchas();
+
+        $id = $this->generateId();
         $tries = 5;
 
         while ($tries-- && file_exists($this->imgDir . $id . $this->suffix)) {
             $id = $this->generateRandomId();
-            $this->setId($id);
+            $this->id = $id;
         }
 
-        $this->generateImage($id, $this->getWord());
+        $this->generateImage($id, $this->word);
 
-        return $id;
+        return [
+            'id'   => $id,
+            'word' => $this->word, // diserahkan ke controller untuk disimpan
+        ];
     }
 
-    /**
-     * Generate a unique ID and set the CAPTCHA word
-     *
-     * @return string The generated unique ID.
-     */
     private function generateId(): string
     {
         $id = $this->generateRandomId();
-        $this->setId($id);
+        $this->id = $id;
 
-        $word = random_string('alpha', $this->wordLength);
-        $this->setWord($word);
+        // Campur huruf & angka
+        $word = random_string('numeric', $this->wordLength);
+        $this->word = strtolower($word);
 
         return $id;
     }
 
-    /**
-     * Set the CAPTCHA ID
-     *
-     * @param string $id The unique ID for the CAPTCHA.
-     */
-    protected function setId(string $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * Get the stored CAPTCHA word
-     *
-     * @return string|null The stored CAPTCHA word.
-     */
-    public function getWord(): ?string
-    {
-        return $this->word;
-    }
-
-    /**
-     * Set the CAPTCHA word and store it in session
-     *
-     * @param string $word The word to store.
-     */
-    protected function setWord(string $word): void
-    {
-        $word = strtolower($word);
-
-        session()->set('word', $word);
-        $this->word = $word;
-    }
-
-    /**
-     * Generate a random unique ID
-     *
-     * @return string The generated unique ID.
-     */
     protected function generateRandomId(): string
     {
-        return md5(random_bytes(32));
+        return bin2hex(random_bytes(16));
     }
 
-    /**
-     * Generate the CAPTCHA image
-     *
-     * @param string $id The CAPTCHA ID.
-     * @param string $word The CAPTCHA text.
-     * @throws Exception If no font is specified.
-     */
     protected function generateImage(string $id, string $word): void
     {
-        $font = $this->font;
-
-        if (empty($font)) {
-            throw new Exception('Image CAPTCHA requires font');
+        if (empty($this->font) || !file_exists($this->font)) {
+            throw new Exception('Valid font file is required for CAPTCHA');
         }
 
         $w     = $this->width;
         $h     = $this->height;
-        $fsize = $this->fontSize;
+        $fsize = mt_rand($this->fontSize - 2, $this->fontSize + 2);
 
-        $imgFile = $this->getImgDir() . $id . $this->getSuffix();
+        $imgFile = $this->imgDir . $id . $this->suffix;
         $img = imagecreatetruecolor($w, $h);
 
 
         $textColor = imagecolorallocate($img, 0, 0, 0);
         $bgColor   = imagecolorallocate($img, 255, 255, 255);
         imagefilledrectangle($img, 0, 0, $w - 1, $h - 1, $bgColor);
-        $textbox = imageftbbox($fsize, 0, $font, $word);
+        $textbox = imageftbbox($fsize, 0, $this->font, $word);
         $x       = ($w - ($textbox[2] - $textbox[0])) / 2;
         $y       = ($h - ($textbox[7] - $textbox[1])) / 2;
         $x       = (int) $x;
         $y       = (int) $y;
-        imagefttext($img, $fsize, 0, $x, $y, $textColor, $font, $word);
+        imagefttext($img, $fsize, 0, $x, $y, $textColor, $this->font, $word);
 
         // generate noise
         for ($i = 0; $i < $this->dotNoiseLevel; $i++) {
@@ -339,5 +252,14 @@ class Image
     protected function randomSize()
     {
         return mt_rand(300, 700) / 100;
+    }
+
+    protected function cleanupOldCaptchas(): void
+    {
+        foreach (glob($this->imgDir . '*' . $this->suffix) as $file) {
+            if (filemtime($file) + $this->expiration < time()) {
+                @unlink($file);
+            }
+        }
     }
 }

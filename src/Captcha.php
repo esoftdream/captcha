@@ -20,29 +20,18 @@ class Captcha
      *
      * @return void|false
      */
-    public function generate()
+    public function generate(string $baseUrl  = 'captcha/image/')
     {
-        $hash = $this->captcha->generate();
-        $word = $this->captcha->getWord();
+        $captcha = new \Esoftdream\Image();
+        $result = $captcha->generate();
 
-        // Simpan teks captcha ke session untuk validasi
-        session()->set('captcha_word', $word);
+        // Simpan ke cache selama 10 menit
+        cache()->save('captcha_' . $result['id'], $result['word'], 600);
 
-        // Path lengkap gambar captcha
-        $imagePath = $this->captcha->getImgDir() . $hash . $this->captcha->getSuffix();
-
-        // Pastikan file captcha ada sebelum mengirimkan output
-        if (file_exists($imagePath)) {
-            // Set header untuk gambar PNG
-            header('Content-Type: image/png');
-            readfile($imagePath);
-
-            // remove cache file
-            unlink($imagePath);
-            exit;
-        } else {
-            return 'Captcha image not found.';
-        }
+        return [
+            'captcha_id' => $result['id'],
+            'image_url'  => base_url($baseUrl . $result['id'])
+        ];
     }
 
     /**
@@ -52,13 +41,14 @@ class Captcha
      *
      * @return bool true jika input user sama dengan CAPTCHA yang di generate
      */
-    public function verify(string $string): bool
+    public function verify(string $id, string $input): bool
     {
-        $word = session()->get('captcha_word');
+        $word = cache('captcha_' . $id);
 
-        // Hapus teks CAPTCHA dari session
-        session()->remove('captcha_word');
-
-        return $word == $string;
+        if ($word && $word === $input) {
+            cache()->delete('captcha_' . $id);
+            return true;
+        }
+        return false;
     }
 }
