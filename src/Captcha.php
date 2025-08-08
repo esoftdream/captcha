@@ -28,10 +28,10 @@ class Captcha
         // Simpan ke cache selama 10 menit
         cache()->save('captcha_' . $result['id'], $result['word'], 600);
 
-        return response()->setJSON([
+        return [
             'captcha_id' => $result['id'],
             'image_url'  => base_url($baseUrl . $result['id'])
-        ]);
+        ];
     }
 
     /**
