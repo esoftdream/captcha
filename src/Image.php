@@ -16,7 +16,7 @@ class Image
     protected int $lineNoiseLevel = 5;
     protected int $expiration = 600;
     protected ?string $word = null;
-    protected int $wordLength = 8;
+    protected int $wordLength = 6;
     protected ?string $id = null;
 
     public function __construct(string $imgDir = null, string $fontPath = null)
