@@ -82,7 +82,7 @@ class Image
     {
         $this->cleanupOldCaptchas();
 
-        $id = $this->generateId();
+        $id = 'captcha_' . $this->generateId();
         $tries = 5;
 
         while ($tries-- && file_exists($this->imgDir . $id . $this->suffix)) {
