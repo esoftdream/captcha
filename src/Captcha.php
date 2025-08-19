@@ -43,7 +43,7 @@ class Captcha
      */
     public function verify(string $id, string $input): bool
     {
-        $word = cache('captcha_' . $id);
+        $word = cache($id);
 
         if ($word && $word === $input) {
             cache()->delete($id);
