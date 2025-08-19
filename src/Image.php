@@ -256,9 +256,21 @@ class Image
 
     protected function cleanupOldCaptchas(): void
     {
-        foreach (glob($this->imgDir . '*' . $this->suffix) as $file) {
-            if (filemtime($file) + $this->expiration < time()) {
-                @unlink($file);
+        foreach (glob($this->imgDir . '*' . $this->suffix) as $fileWithExt) {
+            $baseFile = substr($fileWithExt, 0, -strlen($this->suffix)); // Hapus ekstensi
+
+            // log_message('notice', $baseFile);
+
+            // Cek waktu kedaluwarsa berdasarkan file gambar
+            if (filemtime($fileWithExt) + $this->expiration < time()) {
+                // Hapus file gambar
+                @unlink($fileWithExt);
+
+                // Hapus file tanpa ekstensi jika ada
+                $fileWithoutExt = $baseFile;
+                if (file_exists($fileWithoutExt)) {
+                    @unlink($fileWithoutExt);
+                }
             }
         }
     }
