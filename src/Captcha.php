@@ -47,6 +47,7 @@ class Captcha
 
         if ($word && $word === $input) {
             cache()->delete($id);
+            @unlink($this->captcha->getImgDir() . $id . $this->captcha->getSuffix());
             return true;
         }
         return false;
