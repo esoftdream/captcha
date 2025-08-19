@@ -26,7 +26,7 @@ class Captcha
         $result = $captcha->generate();
 
         // Simpan ke cache selama 10 menit
-        cache()->save('captcha_' . $result['id'], $result['word'], 600);
+        cache()->save($result['id'], $result['word'], 600);
 
         return [
             'captcha_id' => $result['id'],
@@ -46,7 +46,7 @@ class Captcha
         $word = cache('captcha_' . $id);
 
         if ($word && $word === $input) {
-            cache()->delete('captcha_' . $id);
+            cache()->delete($id);
             return true;
         }
         return false;
