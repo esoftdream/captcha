@@ -29,7 +29,7 @@ class Image
     protected string $font = __DIR__ . '/font/mangalb.ttf';
     protected int $fontSize = 24;
     protected int $width = 200;
-    protected int $height = 50;
+    protected int $height = 60;
     protected string $suffix = ".png";
     protected int $dotNoiseLevel = 100;
     protected int $lineNoiseLevel = 5;
@@ -149,11 +149,13 @@ class Image
         $word = '';
         $maxIndex = strlen($allowedChars) - 1;
 
+        // Generate random word using a cryptographically secure pseudorandom number generator
+        $randomBytes = random_bytes($this->wordLength);
         for ($i = 0; $i < $this->wordLength; $i++) {
-            $word .= $allowedChars[random_int(0, $maxIndex)];
+            $word .= $allowedChars[ord($randomBytes[$i]) % $maxIndex];
         }
 
-        $this->word = strtolower($word);
+        $this->setWord(strtolower($word));
 
         return $id;
     }
