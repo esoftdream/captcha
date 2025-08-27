@@ -155,7 +155,7 @@ class Image
         $this->id = $id;
 
         // Karakter valid: A-Z tanpa I,i,l,L,0,o,O
-        $allowedChars = 'ABCDEabcde';
+        $allowedChars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
         $word = '';
         $maxIndex = strlen($allowedChars) - 1;
 
