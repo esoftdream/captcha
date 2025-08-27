@@ -139,16 +139,6 @@ class Image
      *
      * @return string The generated unique ID.
      */
-    // private function generateId(): string
-    // {
-    //     $id = $this->generateRandomId();
-    //     $this->setId($id);
-
-    //     $word = random_string('alpha', $this->wordLength);
-    //     $this->setWord($word);
-
-    //     return $id;
-    // }
     private function generateId(): string
     {
         $id = $this->generateRandomId();
