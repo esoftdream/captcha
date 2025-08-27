@@ -139,16 +139,35 @@ class Image
      *
      * @return string The generated unique ID.
      */
+    // private function generateId(): string
+    // {
+    //     $id = $this->generateRandomId();
+    //     $this->setId($id);
+
+    //     $word = random_string('alpha', $this->wordLength);
+    //     $this->setWord($word);
+
+    //     return $id;
+    // }
     private function generateId(): string
     {
         $id = $this->generateRandomId();
-        $this->setId($id);
+        $this->id = $id;
 
-        $word = random_string('alpha', $this->wordLength);
-        $this->setWord($word);
+        // Karakter valid: A-Z tanpa I,i,l,L,0,o,O
+        $allowedChars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+        $word = '';
+        $maxIndex = strlen($allowedChars) - 1;
+
+        for ($i = 0; $i < $this->wordLength; $i++) {
+            $word .= $allowedChars[random_int(0, $maxIndex)];
+        }
+
+        $this->word = strtolower($word);
 
         return $id;
     }
+
 
     /**
      * Set the CAPTCHA ID
@@ -283,9 +302,9 @@ class Image
                     $fracY1 = 1 - $fracY;
 
                     $newcolor = $color * $fracX1 * $fracY1
-                              + $colorX * $fracX * $fracY1
-                              + $colorY * $fracX1 * $fracY
-                              + $colorXY * $fracX * $fracY;
+                        + $colorX * $fracX * $fracY1
+                        + $colorY * $fracX1 * $fracY
+                        + $colorXY * $fracX * $fracY;
                 }
 
                 imagesetpixel($img2, $x, $y, imagecolorallocate(
