@@ -6,7 +6,7 @@ class Captcha
 {
     private Image $captcha;
 
-    public function __construct(int $width = 300, int $height = 50)
+    public function __construct(int $width = 300, int $height = 60)
     {
         // Inisialisasi konfigurasi CAPTCHA
         $this->captcha = new Image();
