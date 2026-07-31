@@ -19,7 +19,7 @@ class Image
     protected int $wordLength = 6;
     protected ?string $id = null;
 
-    public function __construct(string $imgDir = null, string $fontPath = null)
+    public function __construct(?string $imgDir = null, ?string $fontPath = null)
     {
         if (!extension_loaded("gd")) {
             throw new Exception("GD extension is required for CAPTCHA generation.");
